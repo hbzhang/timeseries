@@ -50,7 +50,7 @@ def load_data(file_name, collection, noise):
 		if yi == 2:
 			if noise == True:
 				count += 1
-				if count > 100:
+				if count > 500:
 					continue
 				else:
 					yi = random.randint(0,1)
