@@ -23,7 +23,7 @@ from pybrain.structure.modules   import SoftmaxLayer
 
 def joints_collection(posture):
     switcher = {
-        "left-right" : ['AnkleRight', 'AnkleLeft', 'FootRight', 'FootLeft'],
+        "left-right" : ['FootRight', 'FootLeft'],
         "turning" : ['HandLeft', 'HandRight', 'WristLeft', 'WristRight', 'ElbowLeft', 'ElbowRight', 'ShoulderLeft',
                     'ShoulderRight', 'ShoulderCenter', 'HipLeft', 'HipRight', 'HipCenter', 'KneeLeft', 'KneeRight'],
         "bending" : ['Head', 'ShoulderLeft', 'ShoulderRight', 'ShoulderCenter', 'ElbowLeft', 'ElbowRight', 'WristLeft',
