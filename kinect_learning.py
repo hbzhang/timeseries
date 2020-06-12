@@ -25,6 +25,8 @@ def joints_collection(posture):
                     'ShoulderRight', 'ShoulderCenter', 'HipLeft', 'HipRight', 'HipCenter', 'KneeLeft', 'KneeRight'],
         "bending" : ['Head', 'ShoulderLeft', 'ShoulderRight', 'ShoulderCenter', 'ElbowLeft', 'ElbowRight', 'WristLeft',
                    'WristRight', 'HandLeft', 'HandRight', 'Spine', 'HipLeft', 'HipRight', 'HipCenter'],
+		"bending1": ['Head', 'ShoulderLeft', 'ShoulderRight', 'ShoulderCenter', 'ElbowLeft', 'ElbowRight', 'WristLeft',
+					'WristRight', 'HandLeft', 'HandRight', 'Spine', 'HipLeft', 'HipRight', 'HipCenter'],
         "up-down" : ['HandLeft', 'HandRight', 'WristLeft', 'WristRight', 'ElbowLeft', 'ElbowRight', 'ShoulderLeft',
                    'ShoulderRight', 'ShoulderCenter'],
         "sit-stand" : ['HipCenter', 'HipLeft', 'HipRight', 'KneeRight', 'KneeLeft', 'WristRight', 'WristLeft',

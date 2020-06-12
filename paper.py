@@ -6,7 +6,7 @@ from kinect_learning import (joints_collection, load_data, SVM, Random_Forest, A
 
 ## Build path to file.
 DATA_DIR = 'data'
-FILE_NAME = 'left-right.csv'
+FILE_NAME = 'bending.csv'
 FILE_PATH = join(DATA_DIR, FILE_NAME)
 
 left_right_col = joints_collection('left-right')
