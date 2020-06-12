@@ -16,7 +16,7 @@ bending_col = joints_collection('bending')
 up_down_col = joints_collection('up-down')
 all_col = joints_collection('all')
 
-COLLECTION = left_right_col
+COLLECTION = bending_col
 print("Printing scores of small collection...")
 print("Collection includes", COLLECTION)
 print("Printing scores of small collection with noise data...")
