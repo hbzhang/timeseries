@@ -18,9 +18,12 @@ from pybrain.tools.shortcuts     import buildNetwork
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.structure.modules   import SoftmaxLayer
 
+
+# "left-right" : ['KneeRight', 'KneeLeft', 'AnkleRight', 'AnkleLeft', 'FootRight', 'FootLeft'],
+
 def joints_collection(posture):
     switcher = {
-        "left-right" : ['KneeRight', 'KneeLeft', 'AnkleRight', 'AnkleLeft', 'FootRight', 'FootLeft'],
+        "left-right" : ['AnkleRight', 'AnkleLeft', 'FootRight', 'FootLeft'],
         "turning" : ['HandLeft', 'HandRight', 'WristLeft', 'WristRight', 'ElbowLeft', 'ElbowRight', 'ShoulderLeft',
                     'ShoulderRight', 'ShoulderCenter', 'HipLeft', 'HipRight', 'HipCenter', 'KneeLeft', 'KneeRight'],
         "bending" : ['Head', 'ShoulderLeft', 'ShoulderRight', 'ShoulderCenter', 'ElbowLeft', 'ElbowRight', 'WristLeft',
