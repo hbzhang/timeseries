@@ -91,7 +91,7 @@ print('Creating data loaders with batch size: {}'.format(bs))
 trn_dl, val_dl = create_loaders(trn_ds, val_ds, bs, jobs=cpu_count())
 
 
-input_dim = 1
+input_dim = 6
 hidden_dim = 256
 layer_dim = 5
 output_dim = 2
@@ -130,7 +130,7 @@ class LSTMClassifier(nn.Module):
 
 
 model = LSTMClassifier(input_dim, hidden_dim, layer_dim, output_dim)
-model = model.cuda()
+model = model#.cuda()
 criterion = nn.CrossEntropyLoss()
 opt = torch.optim.RMSprop(model.parameters(), lr=lr)
 sched = CyclicLR(opt, cosine(t_max=iterations_per_epoch * 2, eta_min=lr/100))
@@ -141,8 +141,8 @@ for epoch in range(1, n_epochs + 1):
 
     for i, (x_batch, y_batch) in enumerate(trn_dl):
         model.train()
-        x_batch = x_batch.cuda()
-        y_batch = y_batch.cuda()
+        x_batch = x_batch#.cuda()
+        y_batch = y_batch#.cuda()
         sched.step()
         opt.zero_grad()
         out = model(x_batch)
