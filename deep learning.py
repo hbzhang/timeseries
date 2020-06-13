@@ -64,7 +64,7 @@ n = 100
 sched = cosine(n)
 lrs = [sched(t, 1) for t in range(n * 4)]
 plt.plot(lrs)
-plt.show()
+#plt.show()
 
 
 def create_datasets(X, y, test_size=0.2):
