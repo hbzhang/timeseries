@@ -63,7 +63,7 @@ def cosine(t_max, eta_min=0):
 n = 100
 sched = cosine(n)
 lrs = [sched(t, 1) for t in range(n * 4)]
-plt.plot(lrs)
+#plt.plot(lrs)
 #plt.show()
 
 
