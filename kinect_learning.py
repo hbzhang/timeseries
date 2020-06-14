@@ -23,7 +23,7 @@ from pybrain.structure.modules   import SoftmaxLayer
 
 def joints_collection(posture):
     switcher = {
-        "left-right" : ['FootRight', 'FootLeft'],
+        "left-right" : ['KneeRight', 'KneeLeft', 'AnkleRight', 'AnkleLeft', 'FootRight', 'FootLeft'],
         "turning" : ['HandLeft', 'HandRight', 'WristLeft', 'WristRight', 'ElbowLeft', 'ElbowRight', 'ShoulderLeft',
                     'ShoulderRight', 'ShoulderCenter', 'HipLeft', 'HipRight', 'HipCenter', 'KneeLeft', 'KneeRight'],
         "bending" : ['Head', 'ShoulderLeft', 'ShoulderRight', 'ShoulderCenter', 'ElbowLeft', 'ElbowRight', 'WristLeft',
@@ -55,7 +55,7 @@ def load_data(file_name, collection, noise):
 		if yi == 2:
 			if noise == True:
 				count += 1
-				if count > 300:
+				if count > 100:
 					continue
 				else:
 					yi = random.randint(0,1)
@@ -72,7 +72,42 @@ def load_data(file_name, collection, noise):
 			#	xj[1] += random.randint(0, 1)
 			#	xj[2] += random.randint(0, 1)
 			Xi = Xi + xj
+
 		X = X + [Xi]
+	return {'positions' : X, 'labels' : y}
+
+def load_data_multiple_dimension(file_name, collection, noise):
+	with open(file_name) as json_file:
+		data = json.loads(json_file.read())
+	X = []
+	y = []
+	count = 0
+	length = len(data)
+	for datum in data:
+		yi = datum['label']
+        ## Add 30 noise data or not
+		if yi == 2:
+			if noise == True:
+				count += 1
+				if count > 300:
+					continue
+				else:
+					yi = random.randint(0,1)
+			else:
+				continue
+
+		y.append(yi)
+		Xi = []
+		features = datum['jointPositions']['jointPositionDict']
+		i = 0
+		for joint in collection:
+			xj = list(features[joint].values())
+			#if noise == True:
+			#	xj[0] += random.randint(0, 1)
+			#	xj[1] += random.randint(0, 1)
+			#	xj[2] += random.randint(0, 1)
+			Xi.append(xj)
+		X.append(Xi)
 	return {'positions' : X, 'labels' : y}
 
 def SVM(X, y, tst_size, ker):

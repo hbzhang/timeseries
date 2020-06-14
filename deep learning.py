@@ -13,7 +13,7 @@ from torch.optim.lr_scheduler import _LRScheduler
 
 import math
 from os.path import join
-from kinect_learning import (joints_collection, load_data, SVM, Random_Forest, AdaBoost, Gaussian_NB, Knn, Neural_Network)
+from kinect_learning import * #(joints_collection, load_data, SVM, Random_Forest, AdaBoost, Gaussian_NB, Knn, Neural_Network)
 
 ## Build path to file.
 DATA_DIR = 'data'
@@ -35,7 +35,7 @@ print("Printing scores of small collection...")
 print("Collection includes", COLLECTION)
 print("Printing scores of small collection with noise data...")
 noise = True
-X, y = load_data(FILE_PATH, COLLECTION, noise)['positions'], load_data(FILE_PATH, COLLECTION, noise)['labels']
+X, y = load_data_multiple_dimension(FILE_PATH, COLLECTION, noise)['positions'], load_data_multiple_dimension(FILE_PATH, COLLECTION, noise)['labels']
 
 
 def accuracy(output, target):
@@ -66,15 +66,29 @@ lrs = [sched(t, 1) for t in range(n * 4)]
 #plt.plot(lrs)
 #plt.show()
 
-
 def create_datasets(X, y, test_size=0.2):
     X = np.asarray(X, dtype=np.float32)
     y =np.asarray(y,dtype=np.int16)
+
+    divsion = X.shape[0]%10
+    actual_length =  X.shape[0] - divsion
+    X = X[0:actual_length,:]
+    y = y[0:actual_length]
+
+    #X = X[:, 0]
+
     X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.1)
     X_train, X_valid = [torch.tensor(arr, dtype=torch.float32) for arr in (X_train, X_valid)]
     y_train, y_valid = [torch.tensor(arr, dtype=torch.long) for arr in (y_train, y_valid)]
+
+    #X_train = X_train.unsqueeze(-1)#.unsqueeze(1)
+    #X_valid = X_valid.unsqueeze(-1)#.unsqueeze(1)
+    #y_train = y_train.unsqueeze(1)
+    #y_valid = y_valid.unsqueeze(1)
+
     train_ds = TensorDataset(X_train, y_train)
     valid_ds = TensorDataset(X_valid, y_valid)
+
     return train_ds, valid_ds
 
 def create_loaders(train_ds, valid_ds, bs=512, jobs=0):
@@ -86,27 +100,26 @@ def create_loaders(train_ds, valid_ds, bs=512, jobs=0):
 print('Preparing datasets')
 trn_ds, val_ds = create_datasets(X, y)
 
-bs = 128
+bs = 200
 print('Creating data loaders with batch size: {}'.format(bs))
 trn_dl, val_dl = create_loaders(trn_ds, val_ds, bs, jobs=cpu_count())
 
 
-input_dim = 6
+input_dim = 3
 hidden_dim = 256
 layer_dim = 5
 output_dim = 2
 seq_dim = 128
 
 lr = 0.0005
-n_epochs = 1000
+n_epochs = 5000
 iterations_per_epoch = len(trn_dl)
 best_acc = 0
-patience, trials = 100, 0
+patience, trials = 100000, 0
 
 
 class LSTMClassifier(nn.Module):
     """Very simple implementation of LSTM-based time-series classifier."""
-
     def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
         super(LSTMClassifier,self).__init__()
         self.hidden_dim = hidden_dim
@@ -117,20 +130,21 @@ class LSTMClassifier(nn.Module):
         self.hidden = None
 
     def forward(self, x):
+        #print(type(x), x.size())
         h0, c0 = self.init_hidden(x)
         out, (hn, cn) = self.rnn(x, (h0, c0))
         out = self.fc(out[:, -1, :])
         return out
 
     def init_hidden(self, x):
+        #print(type(x), x.size())
         h0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim)
         c0 = torch.zeros(self.layer_dim, x.size(0), self.hidden_dim)
+        #t.cuda()
         return [t.cuda() for t in (h0, c0)]
 
-
-
 model = LSTMClassifier(input_dim, hidden_dim, layer_dim, output_dim)
-model = model#.cuda()
+model = model.cuda()
 criterion = nn.CrossEntropyLoss()
 opt = torch.optim.RMSprop(model.parameters(), lr=lr)
 sched = CyclicLR(opt, cosine(t_max=iterations_per_epoch * 2, eta_min=lr/100))
@@ -140,9 +154,9 @@ print('Start model training')
 for epoch in range(1, n_epochs + 1):
 
     for i, (x_batch, y_batch) in enumerate(trn_dl):
+        x_batch = x_batch.cuda()
+        y_batch = y_batch.cuda()
         model.train()
-        x_batch = x_batch#.cuda()
-        y_batch = y_batch#.cuda()
         sched.step()
         opt.zero_grad()
         out = model(x_batch)
@@ -152,25 +166,30 @@ for epoch in range(1, n_epochs + 1):
 
     model.eval()
     correct, total = 0, 0
+
+    #for j, (x_val, y_val) in enumerate(val_dl):
     for x_val, y_val in val_dl:
-        x_val, y_val = [t.cuda() for t in (x_val, y_val)]
+        #t.cuda()
+        x_val, y_val = [ t.cuda() for t in (x_val, y_val)]
         out = model(x_val)
         preds = F.log_softmax(out, dim=1).argmax(dim=1)
         total += y_val.size(0)
         correct += (preds == y_val).sum().item()
 
-    acc = correct / total
+    print(correct, total)
+    acc = correct*1.0/total
+    print("%.5f" %acc)
 
     if epoch % 5 == 0:
-        var = 'Epoch: {3d}. Loss: {.4f}. Acc.: {2.2%}'
-        var = var.format(epoch,loss.item(),acc, )
+        var = 'Epoch: {:3d}. Loss: {:4.4f}. Acc.: {:2.4f}'
+        var = var.format(epoch,loss.item(),acc)
         print(var)
 
     if acc > best_acc:
         trials = 0
         best_acc = acc
         torch.save(model.state_dict(), 'best.pth')
-        var ='Epoch {} best model saved with accuracy: {2.2%}'
+        var ='Epoch {:2d} best model saved with accuracy: {:2.2f}'
         var.format(epoch, best_acc)
         print()
     else:
